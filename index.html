@@ -137,14 +137,14 @@
     }).addTo(map);
 
 
-  // adicionar o layer (casos) ao mapa
-  var markers = L.markerClusterGroup()
-
-  var casosLayer =L.geoJSON(casosData, {
-      onEachFeature: function (feature, layer) {layer.bindPopup (feature.properties[1]);}
-    });
-  
-  map.addLayer(markers);
+  // adicionar o layer (casos) ao mapa	  
+  var markers = L.markerClusterGroup();	
+	for (var i = 0; i < casosData.length; i++) {
+		var a = casosData[i];
+		var title = a[2];
+		var marker = L.marker(new L.LatLng(a[0], a[1]), { title: title });
+		marker.bindPopup(title);
+		markers.addLayer(marker);
   
 
   // adicionar o control da informacao
