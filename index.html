@@ -83,8 +83,7 @@
            d > 5     ? '#fc4e2a' :
            d > 3     ? '#fd8d3c' :
            d > 2     ? '#feb24c' :
-           d > 1     ? '#fed976' :
-           d > 0.25  ? '#ffeda0' : '#ffffcc' ;
+           d > 1     ? '#fed976' : '#ffffcc' ;
   }
 
 
@@ -170,7 +169,7 @@
 	legend.onAdd = function (map) {
 
 		const div = L.DomUtil.create('div', 'info legend');
-		const grades = [0, 0.25, 1, 2, 3, 5, 7, 10];
+		const grades = [0, 1, 2, 3, 5, 7, 10];
 		const labels = [];
 		let from, to;
 
