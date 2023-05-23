@@ -145,6 +145,8 @@
 		var marker = L.marker(new L.LatLng(a[0], a[1]), { title: title });
 		marker.bindPopup(title);
 		markers.addLayer(marker);
+	}
+   map.addLayer(markers);
   
 
   // adicionar o control da informacao
@@ -197,7 +199,7 @@
   };
 
   var overlayMaps = {
-    "Casos": casosLayer,
+    "Casos": markers,
     "Casos por 10k hab": casospor10khabLayer
   };
 
