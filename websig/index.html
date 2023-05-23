@@ -1,0 +1,212 @@
+<html>
+
+<head>
+
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+  <title>Mapa Casos Covid</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+   integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI="
+   crossorigin=""/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" crossorigin="">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" crossorigin="">
+
+  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
+    integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM="
+    crossorigin=""></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster-src.js" crossorigin=""></script>
+
+  <style>
+    #map{ height: 90% }
+
+    .info {
+      padding: 6px 8px;
+      font: 14px/16px Arial, Helvetica, sans-serif;
+      background: white;
+      background: rgba(255,255,255,0.8);
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      border-radius: 5px;
+    }
+    .info h4 {
+      margin: 0 0 5px;
+      color: #777;
+    }
+
+    .legend {
+      line-height: 18px;
+      color: #555;
+    }
+    .legend i {
+      width: 18px;
+      height: 18px;
+      float: left;
+      margin-right: 8px;
+      opacity: 0.7;
+    }
+
+     .leaflet-control-layers {
+      font-family: Arial, sans-serif;
+      background-color: white;
+      border-radius: 5px;
+      padding: 6px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    }
+    .leaflet-control-layers label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+  <div id="map"></div>
+  <script src="data/casos.geojson"></script>
+  <script src="data/casospor10khab.geojson"></script>
+
+  <script>
+  // iniciar o mapa
+  var map = L.map('map').setView([38.749233, -9.155262], 20);
+
+
+  // carregar o tile layer
+  var basemap = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 11,
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(map);
+
+
+  // definir a cor da variavel
+  function casospor10khabColor(d) {
+    return d > 10    ? '#b10026' :
+           d > 7     ? '#e31a1c' :
+           d > 5     ? '#fc4e2a' :
+           d > 3     ? '#fd8d3c' :
+           d > 2     ? '#feb24c' :
+           d > 1     ? '#fed976' :
+           d > 0.25  ? '#ffeda0' :
+                       '#ffffcc' ;
+  }
+
+
+  // definir o style da variavel
+  function casospor10khabStyle(feature) {
+    return {
+        fillColor: casospor10khabColor(feature.properties.Casos_23_1),
+        weight: 2,
+        opacity: 1,
+        color: 'white',
+        dashArray: '3',
+        fillOpacity: 0.7
+    };
+  }
+
+  // definir funcoes do layer
+  function highlightFeature(e) {
+    var layer = e.target;
+    layer.setStyle({
+        weight: 5,
+        color: '#666',
+        dashArray: '',
+        fillOpacity: 0.7
+    });
+    layer.bringToFront();
+    info.update(layer.feature.properties);
+  }
+
+  function resetHighlight(e) {
+    geojson.resetStyle(e.target);
+    info.update();
+  }
+
+  function zoomToFeature(e) {
+    map.fitBounds(e.target.getBounds());
+  }
+
+  function onEachFeature(feature, layer) {
+    layer.on({
+        mouseover: highlightFeature,
+        mouseout: resetHighlight,
+        click: zoomToFeature
+    });
+  }
+
+
+  // adicionar o layer (casospor10khab) e as funcionalidades ao mapa
+  geojson = L.geoJson(casospor10khabData, {
+      style: casospor10khabStyle,
+      onEachFeature: onEachFeature
+    }).addTo(map);
+
+
+  // adicionar o layer (casos) ao mapa
+  var markers = L.markerClusterGroup();
+
+  var casosLayer = L.markerClusterGroup(casosData, {
+      //onEachFeature: function (feature, layer) {layer.bindPopup (feature.properties.1);}
+    });
+  
+  markers.addLayer(casosLayer);
+  map.addLayer(markers);
+  
+
+  // adicionar o control da informacao
+  var info = L.control();
+  info.onAdd = function (map) {
+    this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+    this.update();
+    return this._div;
+  };
+  // method that we will use to update the control based on feature properties passed
+  info.update = function (props) {
+    this._div.innerHTML = '<h4>Casos por 10.000 Habitantes</h4>' +  (props ?
+        '<b>' + props.Concelho + '</b><br />' + props.Casos_23_1 + ' casos por 10 mil hab.'
+        : 'Selecione um concelho');
+  };
+  info.addTo(map);
+
+
+  // adicionar o control da legenda
+  var legend = L.control({position: 'bottomright'});
+  legend.onAdd = function (map) {
+    var div = L.DomUtil.create('div', 'info legend'),
+        grades = [0, 0.25, 1, 2, 3, 5, 7, 10],
+        labels = [];
+    // loop through our density intervals and generate a label with a colored square for each interval
+    for (var i = 0; i < grades.length; i++) {
+        div.innerHTML +=
+            '<i style="background:' + casospor10khabColor(grades[i] + 1) + '"></i> ' +
+            grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+    }
+    return div;
+  };
+  legend.addTo(map);
+
+
+  // adicionar o control da escala
+  L.control.scale().addTo(map);
+
+
+  // definir variaveis para o control das layers
+  var baseMaps = {
+    "Basemap": basemap
+  };
+
+  var overlayMaps = {
+    "Casos": casosLayer,
+    "Casos por 10k hab": geojson
+  };
+
+
+  // adicionar o control das layers
+  L.control.layers(baseMaps, overlayMaps).addTo(map);
+
+  </script>
+
+</body>
+
+</html>
