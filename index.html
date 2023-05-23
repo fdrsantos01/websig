@@ -147,7 +147,7 @@
   var markers = L.markerClusterGroup();
 
   var casosLayer = L.markerClusterGroup(casosData, {
-      //onEachFeature: function (feature, layer) {layer.bindPopup (feature.properties.1);}
+      onEachFeature: function (feature, layer) {layer.bindPopup (feature.properties.1);}
     });
   
   markers.addLayer(casosLayer);
