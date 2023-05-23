@@ -6,12 +6,16 @@
 
   <title>Mapa Casos Covid</title>
 
-  <link rel="stylesheet" href="js/leaflet.css"/>
-  <link rel="stylesheet" href="dist/MarkerCluster.css">
-  <link rel="stylesheet" href="dist/MarkerCluster.Default.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+   integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI="
+   crossorigin=""/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" crossorigin="">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" crossorigin="">
 
-  <script src="js/leaflet.js"></script>
-  <script src="dist/leaflet.markercluster-src.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
+    integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM="
+    crossorigin=""></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster-src.js" crossorigin=""></script>
 
   <style>
     #map{ height: 90% }
@@ -83,7 +87,9 @@
            d > 5     ? '#fc4e2a' :
            d > 3     ? '#fd8d3c' :
            d > 2     ? '#feb24c' :
-           d > 1     ? '#fed976' : '#ffffcc' ;
+           d > 1     ? '#fed976' :
+           d > 0.25  ? '#ffeda0' :
+                       '#ffffcc' ;
   }
 
 
@@ -131,14 +137,21 @@
 
 
   // adicionar o layer (casospor10khab) e as funcionalidades ao mapa
-  casospor10khabLayer = L.geoJson(casospor10khabData, {
+  geojson = L.geoJson(casospor10khabData, {
       style: casospor10khabStyle,
       onEachFeature: onEachFeature
     }).addTo(map);
 
 
-  // adicionar o layer (casos) ao mapa	  
+  // adicionar o layer (casos) ao mapa
+  var markers = L.geoJSON(casosData);
 
+  var casosLayer = L.markerClusterGroup(casosData, {
+      //onEachFeature: function (feature, layer) {layer.bindPopup (feature.properties.1);}
+    });
+  
+  markers.addLayer(casosLayer);
+  map.addLayer(markers);
   
 
   // adicionar o control da informacao
@@ -158,27 +171,20 @@
 
 
   // adicionar o control da legenda
-	const legend = L.control({position: 'bottomright'});
-
-	legend.onAdd = function (map) {
-
-		const div = L.DomUtil.create('div', 'info legend');
-		const grades = [0, 1, 2, 3, 5, 7, 10];
-		const labels = [];
-		let from, to;
-
-		for (let i = 0; i < grades.length; i++) {
-			from = grades[i];
-			to = grades[i + 1];
-
-			labels.push(`<i style="background:${casospor10khabColor(from + 1)}"></i> ${from}${to ? `&ndash;${to}` : '+'}`);
-		}
-
-		div.innerHTML = labels.join('<br>');
-		return div;
-	};
-
-	legend.addTo(map);
+  var legend = L.control({position: 'bottomright'});
+  legend.onAdd = function (map) {
+    var div = L.DomUtil.create('div', 'info legend'),
+        grades = [0, 0.25, 1, 2, 3, 5, 7, 10],
+        labels = [];
+    // loop through our density intervals and generate a label with a colored square for each interval
+    for (var i = 0; i < grades.length; i++) {
+        div.innerHTML +=
+            '<i style="background:' + casospor10khabColor(grades[i] + 1) + '"></i> ' +
+            grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+    }
+    return div;
+  };
+  legend.addTo(map);
 
 
   // adicionar o control da escala
@@ -191,8 +197,8 @@
   };
 
   var overlayMaps = {
-    //"Casos": casosLayer,
-    "Casos por 10k hab": casospor10khabLayer
+    "Casos": casosLayer,
+    "Casos por 10k hab": geojson
   };
 
 
