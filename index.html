@@ -83,12 +83,12 @@
   // definir a cor da variavel
   function casospor10khabColor(d) {
     return d > 10    ? '#b10026' :
-           d > 7     ? '#e31a1c' :
+           d > 8     ? '#e31a1c' :
            d > 5     ? '#fc4e2a' :
-           d > 3     ? '#fd8d3c' :
-           d > 2     ? '#feb24c' :
-           d > 1     ? '#fed976' :
-           d > 0.25  ? '#ffeda0' :
+           d > 4     ? '#fd8d3c' :
+           d > 3     ? '#feb24c' :
+           d > 2     ? '#fed976' :
+           d > 1     ? '#ffeda0' :
                        '#ffffcc' ;
   }
 
@@ -144,7 +144,7 @@
 
 
   // adicionar o layer (casos) ao mapa
-  var markers = L.geoJSON(casosData);
+  //var markers = L.geoJSON(casosData);
 
   var casosLayer = L.markerClusterGroup(casosData, {
       //onEachFeature: function (feature, layer) {layer.bindPopup (feature.properties.1);}
