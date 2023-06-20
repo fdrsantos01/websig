@@ -156,11 +156,11 @@
   // adicionar o control da informacao
   var info = L.control();
   info.onAdd = function (map) {
-    this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+    this._div = L.DomUtil.create('div', 'info');
     this.update();
     return this._div;
   };
-  // method that we will use to update the control based on feature properties passed
+  
   info.update = function (props) {
     this._div.innerHTML = '<h4>Casos por 10.000 Habitantes</h4>' +  (props ?
         '<b>' + props.Concelho + '</b><br />' + props.Casos_23_1 + ' casos por 10 mil hab.'
@@ -175,7 +175,6 @@
     var div = L.DomUtil.create('div', 'info legend'),
         grades = [0, 1, 2, 3, 4, 5, 8, 10],
         labels = [];
-    // loop through our density intervals and generate a label with a colored square for each interval
     for (var i = 0; i < grades.length; i++) {
         div.innerHTML +=
             '<i style="background:' + casospor10khabColor(grades[i] + 1) + '"></i> ' +
