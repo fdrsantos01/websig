@@ -144,12 +144,9 @@
 
 
   // adicionar o layer (casos) ao mapa
-  //var marker = L.marker(casosData);
-
-  //var casosLayer = L.markerClusterGroup(marker, {
-    });
-  
-  //map.addLayer(markers);
+  var casosLayer = L.markerClusterGroup();
+  casosLayer.addLayer(L.geoJson(casosData));
+  map.addLayer(casosLayer);
   
 
   // adicionar o control da informacao
@@ -195,7 +192,7 @@
   };
 
   var overlayMaps = {
-    //"Casos": casosLayer,
+    "Casos": casosLayer,
     "Casos por 10k hab": geojson
   };
 
